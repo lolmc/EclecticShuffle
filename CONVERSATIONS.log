@@ -1,0 +1,146 @@
+# Conversations Log — lms_shuffle_plugin
+# Format: decisions, choices, and context captured throughout the session.
+
+---
+
+## Session: 2026-04-20 — /office-hours (YC Startup Mode)
+
+### Setup
+
+- **gstack upgraded:** v0.15.1.0 → v1.4.0.0 (auto-upgrade)
+- **Routing rules added to CLAUDE.md:** Auto-invokes specialist skills (investigate, ship, qa, etc.)
+- **Cross-project learnings enabled:** Searches across all local gstack projects for relevant patterns
+
+---
+
+### Context Gathering
+
+**Project:** LMS Shuffle Plugin — a plugin for Lyrion Music Server (LMS).
+
+**Origin:** Brother has LMS + 4TB music collection. He lamented at HiFi shows that shuffle
+"wasn't really random at all" and wished there were tunable parameters. User asked him
+questions about what the parameters would be and built the barebones in this repo.
+
+**What exists so far:**
+- `music-discovery.jsx` — React UI component with 8+ tunable parameters, mood system, band
+  member tracking panel, learning/stats dashboard
+- `music-discovery-api-guide.md` — Integration guide for LMS JSON-RPC, BlueOS, LastFM
+
+---
+
+### Decision: Startup Mode
+
+**Choice:** Startup mode (not builder/hackathon).
+**Context:** User intends to build for the LMS community, with brother as first user and
+UAT partner who will promote to his HiFi network and forums.
+
+---
+
+### Q1: Demand Reality
+
+**Evidence:** Brother is a specific named user. He complained about shuffle at HiFi shows
+(real pain, real social context). He co-designed the parameters when asked.
+**Honest assessment:** Demand is real but low-friction — he's currently tolerating and
+skipping, not actively searching for a solution. The product needs to be noticeably better
+to change behavior.
+
+---
+
+### Q2: Status Quo
+
+**What brother does today:** Tolerates bad shuffle and skips tracks.
+**No active workaround** — no manual playlists, no second app, just passive frustration.
+**Implication:** Pain exists but isn't acute. Product must deliver a clearly different
+feeling, not just marginal improvement.
+
+---
+
+### Q3: Target User & Distribution
+
+**Primary user:** Brother — LMS + 4TB collection, attends HiFi shows, has audiophile
+acquaintances, participates in LMS forum communities.
+**Distribution plan:** Build for brother → he does UAT → he promotes to HiFi show network
+and LMS forums.
+**Why this works:** HiFi enthusiasts talk to each other. LMS is niche but passionate.
+Brother is both design partner and first distribution channel.
+
+---
+
+### Landscape Search Results
+
+Existing LMS plugins in this space:
+- **Dynamic Playlists** (AF-1/lms-dynamicplaylists) — criteria-based mixes (genre, decade,
+  rating). Actively maintained. Closest existing thing.
+- **Dynamic Mix Plugin** — Style, Variety, Filter controls. Closer to tunable parameters.
+
+**Gap identified (EUREKA):** Every existing plugin is criteria-in → playlist-out (static
+filters). None have a feedback loop. None watch what you actually play/skip and adapt.
+None track band member career movements.
+**Conclusion:** The learning loop is the real differentiator, not the parameters.
+
+---
+
+### Agreed Premises (Phase 3)
+
+1. The real differentiator is the **learning loop** — filters already exist, adaptive
+   improvement doesn't.
+2. Brother is the right first user: engaged, real collection, community connector.
+3. LMS ecosystem is **open source/free** — reputation and community first, monetization
+   later if ever.
+4. ~~Band member tracking is the most novel feature~~ → **REVISED** (see below)
+
+---
+
+### Second Opinion — Claude Subagent (Phase 3.5)
+
+Key findings from independent review:
+- Steelman: "A personalized music intelligence layer for serious collectors — playback
+  becomes a signal, not just an event. The first LMS plugin that gets meaningfully better
+  the longer you use it."
+- Key quote identified: "shuffle wasn't really random at all" — diagnosis of **broken
+  trust**, not a feature request. Brother wants shuffle that feels intentional without
+  being predictable.
+- Challenged Premise 4: Band member tracking was never requested by the brother — it
+  emerged from the builder's enthusiasm. It's the most interesting feature to engineers,
+  not users.
+- 48-hour prototype recommendation: Perl plugin + SQLite + weighted playback scoring +
+  one "adventurousness" slider. Skip React UI, MusicBrainz, BPM analysis, any cloud.
+
+---
+
+### Decision: Premise 4 Revised
+
+**Original:** Band member tracking is the most novel/important feature.
+**Revised:** Band member tracking is **v2** — only after the learning loop is proven and
+brother asks for it during UAT.
+**Why:** It was never requested; it emerged from builder enthusiasm. Depends on external
+data source (MusicBrainz). Adds complexity before the core value is validated.
+
+---
+
+### Approaches Considered (Phase 4)
+
+**Approach A — Native LMS Plugin, Learning Loop First**
+Perl plugin using LMS's standard plugin API. Intercepts playback events, stores in
+SQLite, uses weighted sampling to bias playlist generation. One "adventurousness" slider
+in LMS web UI. Effort: M. Risk: Low.
+
+**Approach B — React UI + LMS Bridge**
+Keep the React component, add a Node/Python bridge to LMS via JSON-RPC. Effort: L.
+Risk: Med (extra install step kills community adoption).
+
+**Approach C — Hybrid: Native Plugin + Optional React Companion**
+Perl plugin handles core (works standalone), React companion adds rich UI as optional
+enhancement. Effort: XL. Risk: Med (two codebases).
+
+---
+
+### Decision: Approach A Chosen
+
+**Choice:** Approach A — Native LMS Plugin, Learning Loop First.
+**Why:** Learning loop is unproven. Prove it works with native Perl, zero external
+dependencies, one slider. If it works, the community will adopt it. React work
+(music-discovery.jsx) is preserved for v2 companion UI once core is validated.
+**What's deferred:** Band member tracking, MusicBrainz, React UI, BPM analysis, cloud.
+
+---

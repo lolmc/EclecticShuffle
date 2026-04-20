@@ -144,3 +144,39 @@ dependencies, one slider. If it works, the community will adopt it. React work
 **What's deferred:** Band member tracking, MusicBrainz, React UI, BPM analysis, cloud.
 
 ---
+
+### Design Document
+
+**Location:** `~/.gstack/projects/mcbridl-lms_shuffle_plugin/mcbridl-main-design-20260420-095319.md`
+**Status:** APPROVED
+**Adversarial review:** 3 rounds. 26 issues found, 18 fixed. Quality score: 7/10.
+
+Key technical decisions locked in the design doc:
+- **Scoring formula:** `base_weight * 0.977 ^ days_since_last_play`. Completion: +1.0 (cap 10.0). Skip: -0.5 (floor 0.1).
+- **Softmax:** log-sum-exp normalised, temperature controlled by adventurousness slider (0–10).
+- **Cold-start:** 20 distinct tracks with play history required before weighted mode activates.
+- **Playlist trigger:** queue top-up on `['playlist', 'newsong']` when < 5 tracks remain.
+- **SQLite schema:** `play_events` + `track_weights` tables. WAL mode. 365-day pruning.
+- **track_id:** LMS file path (stable across rescans).
+- **Multi-player:** server-wide weights in v1. Per-player profiles deferred to v2.
+- **Failure mode:** any DB error → silent fallback to LMS native shuffle.
+
+### Reviewer Concerns (resolve before coding)
+
+1. DBD::SQLite availability on brother's machine — hard pre-condition, not an open question.
+2. Slider value persistence mechanism (recommend `Slim::Utils::Prefs`).
+3. Decay divergence: live scoring vs. post-prune recalculation — decide before writing `Schema.pm`.
+4. SQL-side pre-filter for softmax candidate pool (performance on large collections).
+5. `schema_version` table needed for future migrations.
+6. Reset weights UI for polluted weight history.
+7. `Schema::get_all_weights()` return shape definition.
+8. Slider=10 UI copy ("learning paused" vs. "weights not used").
+
+### Next Steps
+
+1. Confirm brother's LMS version and run `perl -MDBD::SQLite -e 1` on his machine.
+2. Install AF-1 Dynamic Playlists on his LMS — have him use it for a week, log what's
+   still missing. That gap list validates the learning loop as the right wedge.
+3. Use `/plan-eng-review` to lock in the implementation plan before writing Plugin.pm.
+
+---

@@ -172,11 +172,34 @@ Key technical decisions locked in the design doc:
 7. `Schema::get_all_weights()` return shape definition.
 8. Slider=10 UI copy ("learning paused" vs. "weights not used").
 
+### Brother's Environment — Confirmed 2026-04-20
+
+- **LMS Version:** 9.1.0 (Lyrion, Red Hat, x86_64)
+- **Perl Version:** 5.24.3 (system Perl)
+- **LMS internal DB:** DBD::SQLite 1.58 / SQLite 3.22.0 — CONFIRMED AVAILABLE in LMS's
+  own Perl environment (shown in LMS info page)
+- **System Perl check:** `perl -MDBD::SQLite -e 1` fails — but this is the RED HERRING.
+  The system Perl (`/usr/share/perl5`) is NOT what LMS plugins use. LMS has its own
+  bundled Perl with DBD::SQLite already present. Reviewer Concern #1 is RESOLVED.
+
+**Dynamic Playlists UAT result:** Brother has already used Dynamic Playlists. His
+verdict: "not random enough, choices returned can be too focussed." He was skipping.
+This is EXACTLY the gap we designed for. Hypothesis VALIDATED — the learning loop +
+adventurousness slider is the right wedge.
+
+**Key implication:** Dynamic Playlists is the reason the brother was attracted to
+parametric shuffle in the first place. He already knows what he doesn't want.
+
+### Resolved Concerns
+
+- ~~Reviewer Concern #1~~ — DBD::SQLite IS available inside LMS's Perl environment.
+  The plugin uses LMS's Perl, not system Perl. No bundling needed. ✓
+
 ### Next Steps
 
-1. Confirm brother's LMS version and run `perl -MDBD::SQLite -e 1` on his machine.
-2. Install AF-1 Dynamic Playlists on his LMS — have him use it for a week, log what's
-   still missing. That gap list validates the learning loop as the right wedge.
-3. Use `/plan-eng-review` to lock in the implementation plan before writing Plugin.pm.
+1. ~~Confirm brother's LMS version~~ ✓ (9.1.0, Red Hat, x86_64)
+2. ~~Dynamic Playlists UAT~~ ✓ — already done, confirmed too focussed, validates wedge
+3. Resolve remaining Reviewer Concerns 2–8 before writing Plugin.pm
+4. Use `/plan-eng-review` to lock in the implementation plan
 
 ---

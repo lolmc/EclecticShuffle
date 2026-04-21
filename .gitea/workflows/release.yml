@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install perlcritic
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libperl-critic-perl
+
+      - name: Lint
+        run: perlcritic --severity 3 EclecticShuffle/*.pm
+
+      - name: Test
+        run: prove -l t/
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build zip
+        run: |
+          zip -r "EclecticShuffle-${{ steps.version.outputs.version }}.zip" EclecticShuffle/ \
+            --exclude "*.DS_Store" \
+            --exclude "__MACOSX/*"
+
+      - name: Create Gitea release
+        env:
+          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # Create the release
+          RELEASE=$(curl -sf -X POST \
+            "${GITHUB_SERVER_URL}/api/v1/repos/${GITHUB_REPOSITORY}/releases" \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"tag_name\": \"${TAG}\",
+              \"name\": \"EclecticShuffle ${TAG}\",
+              \"body\": \"## EclecticShuffle ${TAG}\n\nSee [README](https://github.com/${GITHUB_REPOSITORY}#installation) for installation instructions.\n\n**Install:** download the zip below, then LMS Settings → Plugins → Install from file.\",
+              \"draft\": false,
+              \"prerelease\": false
+            }")
+
+          RELEASE_ID=$(echo "$RELEASE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+
+          if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "None" ]; then
+            echo "Failed to create release. Response: $RELEASE"
+            exit 1
+          fi
+
+          echo "Created release ID: ${RELEASE_ID}"
+
+          # Upload the zip as a release asset
+          curl -sf -X POST \
+            "${GITHUB_SERVER_URL}/api/v1/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets" \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: multipart/form-data" \
+            -F "attachment=@EclecticShuffle-${VERSION}.zip;type=application/zip"
+
+          echo "Release ${TAG} published."

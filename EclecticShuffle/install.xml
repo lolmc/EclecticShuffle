@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extensions>
+  <plugins>
+    <plugin name="EclecticShuffle" version="1.0.0" minTarget="8.0" maxTarget="*">
+      <title>EclecticShuffle</title>
+      <desc lang="EN">Adaptive shuffle that learns from your listening history. Tracks you complete get played more; tracks you skip get played less.</desc>
+      <link>https://github.com/mcbridl/lms_shuffle_plugin</link>
+      <creator>Lol McBride</creator>
+      <license>MIT</license>
+      <sha><!-- filled by release script --></sha>
+    </plugin>
+  </plugins>
+</extensions>

@@ -1,0 +1,102 @@
+[% pagetitle = 'PLUGIN_ECLECTICSHUFFLE' | string %]
+[% PROCESS settings/header.html %]
+
+<div id="prefs">
+
+  <div class="pref">
+    <div class="prefDesc">
+      [% 'PLUGIN_ECLECTICSHUFFLE_DESC' | string %]
+    </div>
+  </div>
+
+  [%# Status indicator %]
+  <div class="pref">
+    <div class="prefDesc">
+      <b>[% 'PLUGIN_ECLECTICSHUFFLE_STATUS' | string %]:</b>
+      [% IF eclectic_is_fallback %]
+        <span style="color:#cc3300">[% 'PLUGIN_ECLECTICSHUFFLE_STATUS_FALLBACK' | string %]</span>
+      [% ELSIF eclectic_active %]
+        [% IF eclectic_status_key == 'PLUGIN_ECLECTICSHUFFLE_STATUS_LEARNING' %]
+          <span style="color:#cc7700">[% 'PLUGIN_ECLECTICSHUFFLE_STATUS_LEARNING' | string %] ([% eclectic_status_arg %])</span>
+        [% ELSE %]
+          <span style="color:#007700">[% 'PLUGIN_ECLECTICSHUFFLE_STATUS_ACTIVE' | string %] ([% eclectic_status_arg %] [% 'PLUGIN_ECLECTICSHUFFLE_TRACKS' | string %])</span>
+        [% END %]
+      [% ELSE %]
+        <span style="color:#555">[% 'PLUGIN_ECLECTICSHUFFLE_STATUS_INACTIVE' | string %]</span>
+      [% END %]
+    </div>
+  </div>
+
+  [%# Adventurousness slider %]
+  [% UNLESS eclectic_is_fallback %]
+  <form method="post" action="[% page %]">
+    [% IF player %]
+    <input type="hidden" name="player" value="[% player %]">
+    [% END %]
+
+    <div class="pref">
+      <div class="prefDesc">
+        <label for="adventurousness">
+          [% 'PLUGIN_ECLECTICSHUFFLE_ADVENTUROUSNESS' | string %]
+          &nbsp;<span id="slider_val">[% eclectic_slider %]</span>/10
+        </label>
+      </div>
+      <div class="prefRight">
+        <input type="range" id="adventurousness" name="adventurousness"
+               min="0" max="10" value="[% eclectic_slider %]"
+               oninput="document.getElementById('slider_val').textContent = this.value">
+      </div>
+    </div>
+
+    [%# Slider=10 note %]
+    [% IF eclectic_slider == 10 %]
+    <div class="pref">
+      <div class="prefDesc" style="color:#555;font-style:italic">
+        [% 'PLUGIN_ECLECTICSHUFFLE_SLIDER10_NOTE' | string %]
+      </div>
+    </div>
+    [% END %]
+
+    <div class="pref">
+      <div class="prefRight">
+        <input type="submit" name="action" value="save"
+               onclick="this.form.action_taken='save'"
+               class="[% 'PLUGIN_ECLECTICSHUFFLE_SAVE' | string %]">
+      </div>
+    </div>
+
+    [%# Start / Stop button %]
+    <div class="pref">
+      <div class="prefDesc">
+        [% 'PLUGIN_ECLECTICSHUFFLE_CONTROL' | string %]
+      </div>
+      <div class="prefRight">
+        [% IF eclectic_active %]
+          <input type="submit" name="action" value="stop"
+                 class="btn">[% 'PLUGIN_ECLECTICSHUFFLE_STOP' | string %]</input>
+        [% ELSE %]
+          <input type="submit" name="action" value="start"
+                 class="btn">[% 'PLUGIN_ECLECTICSHUFFLE_START' | string %]</input>
+        [% END %]
+      </div>
+    </div>
+
+    [%# Reset weights %]
+    <div class="pref">
+      <div class="prefDesc">
+        [% 'PLUGIN_ECLECTICSHUFFLE_RESET_DESC' | string %]
+      </div>
+      <div class="prefRight">
+        <input type="submit" name="action" value="reset"
+               class="btn"
+               onclick="return confirm('[% 'PLUGIN_ECLECTICSHUFFLE_RESET_CONFIRM' | string %]')"
+               >[% 'PLUGIN_ECLECTICSHUFFLE_RESET' | string %]</input>
+      </div>
+    </div>
+
+  </form>
+  [% END %]
+
+</div>
+
+[% PROCESS settings/footer.html %]

@@ -64,6 +64,11 @@ sub initPlugin {
 
     $class->SUPER::initPlugin(%args);
 
+    if (main::WEBUI) {
+        require Plugins::EclecticShuffle::Settings;
+        Plugins::EclecticShuffle::Settings->new($class);
+    }
+
     Plugins::EclecticShuffle::Schema->init();
 
     # Subscribe to newsong to score the outgoing track and top up the queue.

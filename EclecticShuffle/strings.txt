@@ -1,0 +1,53 @@
+PLUGIN_ECLECTICSHUFFLE
+	EN	Eclectic Shuffle
+
+PLUGIN_ECLECTICSHUFFLE_DESC
+	EN	Adaptive shuffle that learns from your listening history. Tracks you complete get played more; tracks you skip get played less. Gets better the longer you use it.
+
+PLUGIN_ECLECTICSHUFFLE_ADVENTUROUSNESS
+	EN	Adventurousness
+
+PLUGIN_ECLECTICSHUFFLE_ADVENTUROUSNESS_DESC
+	EN	0 = plays your highest-rated tracks first. 10 = fully random (history ignored). 5 = balanced mix of favourites and discovery.
+
+PLUGIN_ECLECTICSHUFFLE_STATUS
+	EN	Status
+
+PLUGIN_ECLECTICSHUFFLE_STATUS_INACTIVE
+	EN	Inactive — click Start to use Eclectic Shuffle
+
+PLUGIN_ECLECTICSHUFFLE_STATUS_LEARNING
+	EN	Learning
+
+PLUGIN_ECLECTICSHUFFLE_STATUS_ACTIVE
+	EN	Eclectic Shuffle active
+
+PLUGIN_ECLECTICSHUFFLE_STATUS_FALLBACK
+	EN	Database unavailable — using native shuffle (check LMS log for details)
+
+PLUGIN_ECLECTICSHUFFLE_TRACKS
+	EN	tracks in history
+
+PLUGIN_ECLECTICSHUFFLE_CONTROL
+	EN	Eclectic Shuffle on/off
+
+PLUGIN_ECLECTICSHUFFLE_START
+	EN	Start Eclectic Shuffle
+
+PLUGIN_ECLECTICSHUFFLE_STOP
+	EN	Stop (use native shuffle)
+
+PLUGIN_ECLECTICSHUFFLE_SAVE
+	EN	Save
+
+PLUGIN_ECLECTICSHUFFLE_SLIDER10_NOTE
+	EN	Weights are not used for selection at this setting. Lower the slider to use your listening history.
+
+PLUGIN_ECLECTICSHUFFLE_RESET_DESC
+	EN	Clear all learned track weights and start fresh.
+
+PLUGIN_ECLECTICSHUFFLE_RESET
+	EN	Reset weights
+
+PLUGIN_ECLECTICSHUFFLE_RESET_CONFIRM
+	EN	Reset all learned weights? This cannot be undone.

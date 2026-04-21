@@ -199,7 +199,135 @@ parametric shuffle in the first place. He already knows what he doesn't want.
 
 1. ~~Confirm brother's LMS version~~ ✓ (9.1.0, Red Hat, x86_64)
 2. ~~Dynamic Playlists UAT~~ ✓ — already done, confirmed too focussed, validates wedge
-3. Resolve remaining Reviewer Concerns 2–8 before writing Plugin.pm
-4. Use `/plan-eng-review` to lock in the implementation plan
+3. ~~Resolve remaining Reviewer Concerns 2–8~~ ✓ — all resolved in /plan-eng-review
+4. ~~Use `/plan-eng-review` to lock in the implementation plan~~ ✓ — DONE (see below)
+5. **Begin implementation** — all pre-conditions cleared, Plugin.pm can be written
+
+---
+
+## Session: 2026-04-21 — /plan-eng-review
+
+### Status: CLEARED — ready to implement
+
+Full architecture review completed. All 8 original Reviewer Concerns resolved.
+Design doc updated at: `~/.gstack/projects/mcbridl-lms_shuffle_plugin/mcbridl-main-design-20260420-095319.md`
+
+---
+
+### Architecture Decisions
+
+**Arch #1 — Mode activation (CRITICAL gap, now resolved)**
+LMS has no plugin-accessible shuffle mode slot. Solution: Add Start/Stop button to
+`Settings.pm`. Clicking Start sets `eclectic_shuffle_active = true` (per-player
+`Slim::Utils::Prefs` key) and immediately calls `Playlist::generate_queue()`.
+The `['playlist', 'newsong']` hook ONLY fires queue top-up logic when the active
+flag is true.
+**Why:** Without this, the plugin would intercept ALL playback for ALL players.
+
+**Arch #2 — Decay divergence: Concern #3**
+Decision: accept and document with a code comment in `Schema.pm`. The divergence
+is a one-day-per-year artifact affecting only tracks at the weight cap/floor.
+Self-corrects within days. Revisit if brother notices "weird post-restart behaviour."
+
+**Arch #3 — Startup prune: run async**
+Use `Slim::Utils::Timers::setTimer` so prune fires on next event loop tick.
+Prevents blocking LMS initialization on large collections.
+
+**Arch #4 — Concerns #2, #8 resolved**
+- Slider: `Slim::Utils::Prefs`, key `adventurousness`, default 5.
+- schema_version table: `CREATE TABLE IF NOT EXISTS schema_version (version INTEGER)`.
+
+---
+
+### Code Quality Decisions
+
+**CQ #1 — Constants block in Plugin.pm (DRY fix)**
+SKIP_PENALTY=0.5, COMPLETION_BONUS=1.0, WEIGHT_FLOOR=0.1, WEIGHT_CAP=10.0,
+DECAY_FACTOR=0.977, COLD_START_MIN=20. Imported by Scoring.pm and Schema.pm.
+
+**CQ #2 — get_all_weights() return shape: Concern #5**
+arrayref of hashrefs: `[{track_id, base_weight, last_updated}, ...]`
+
+**CQ #3 — Slider=10 UI copy: Concern #4**
+"Weights are not used for selection at this setting." (events still record)
+
+**CQ #4 — Reset weights button: Concern #1**
+Confirmed in Settings.pm. DELETE FROM track_weights + recalculate from events.
+
+---
+
+### CRITICAL Fix — Candidate Pool (found by independent outside voice review)
+
+**Problem:** SQL query `WHERE base_weight > 0.2` only returns rows in track_weights.
+Tracks with no play history have no row. After cold-start, plugin would sample only
+from ~200 previously-heard tracks out of 50K. New music never discovered. Broken.
+
+**Fix: Hybrid queue generation**
+```
+weighted_count = round(20 * (1 - slider/10))
+random_count   = 20 - weighted_count
+weighted = softmax_sample(track_weights, weighted_count, T)
+random   = lms_random_tracks(random_count, via executeRequest)
+queue = shuffle(weighted + random)
+```
+
+At slider=5 (default): 10 weighted + 10 random. Discovery AND preference.
+At slider=0: 20 weighted. Pure preference.
+At slider=10: 20 random. Pure exploration (existing behaviour).
+
+**Slider semantics update:** Adventurousness now controls BOTH softmax temperature
+AND weighted/random mix ratio. Temperature formula unchanged.
+
+---
+
+### Performance Fix
+
+SQL pre-filter (Concern #7) corrected. SQLite 3.22 has no POWER(), so decay
+stays in Perl. SQL filter: `WHERE base_weight > 0.2 AND last_updated > (now - 63072000)`.
+The 2-year cutoff eliminates near-zero-score tracks without needing Perl-side score.
+
+---
+
+### Tests Added
+
+`t/scoring.t`, `t/playlist.t`, `t/events.t` — pure logic unit tests.
+Run: `prove -l t/`. Added to GitHub Actions.
+
+---
+
+### TODOS Created
+
+See `TODOS.md` for three tracked items:
+1. Pre-install skip baseline capture (do before UAT)
+2. ARM/Raspberry Pi portability verification (before Plugin Manager submission)
+3. Per-player weight profiles (v2, after learning loop validated)
+
+---
+
+### Reviewer Concerns — Final Status (all 8 closed)
+
+| # | Concern | Status |
+|---|---------|--------|
+| 1 | DBD::SQLite availability | ✓ Confirmed via LMS info page |
+| 2 | Slider persistence mechanism | ✓ Slim::Utils::Prefs, key 'adventurousness', default 5 |
+| 3 | Decay divergence | ✓ Accept + code comment in Schema.pm |
+| 4 | Slider=10 UI copy | ✓ "Weights are not used for selection at this setting" |
+| 5 | get_all_weights() return shape | ✓ arrayref of {track_id, base_weight, last_updated} |
+| 6 | DBD::SQLite feasibility | ✓ Confirmed same as #1 |
+| 7 | SQL-side pre-filter | ✓ base_weight > 0.2 AND last_updated > now - 2 years |
+| 8 | schema_version table | ✓ Added to Schema.pm |
+
+---
+
+### Next Steps
+
+1. Write Plugin.pm — event hooks, queue top-up logic, active flag check
+2. Write Schema.pm — SQLite init, schema_version, prune (async), update_weight (with retry), reset_weights
+3. Write Scoring.pm — incremental weight updates, imports constants from Plugin.pm
+4. Write Playlist.pm — hybrid queue generation (softmax + LMS random)
+5. Write Settings.pm — slider UI, Start/Stop button, Reset button, status indicator
+6. Write t/*.t unit tests alongside implementation
+7. Write install.xml + strings.txt
+8. Test on brother's machine (the real test)
 
 ---

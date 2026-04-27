@@ -205,7 +205,7 @@ sub _get_dbh {
     unless ($ok) {
         $log->error("EclecticShuffle: DB reconnect failed, switching to fallback: $@");
         $_fallback = 1;
-        return undef;
+        return;
     }
     return $_dbh;
 }

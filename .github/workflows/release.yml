@@ -8,6 +8,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -72,7 +74,7 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           SHA: ${{ steps.build.outputs.sha }}
         run: |
-          set -x
+          set -ex
 
           # Build release body using echo (safe inside YAML | block)
           echo '## EclecticShuffle '"${TAG}" > .release-notes.md
@@ -86,8 +88,12 @@ jobs:
           echo '' >> .release-notes.md
           echo 'SHA256: `'"${SHA}"'`' >> .release-notes.md
 
+          # Ensure jq is installed
+          sudo apt-get install -y -qq jq >/dev/null 2>&1
+
           # Create release via API
-          RELEASE=$(curl -sf -X POST \
+          echo "Creating release for tag ${TAG}..."
+          RELEASE=$(curl -f -X POST \
             "https://api.github.com/repos/lolmc/EclecticShuffle/releases" \
             -H "Authorization: token ${GH_TOKEN}" \
             -H "Content-Type: application/json" \

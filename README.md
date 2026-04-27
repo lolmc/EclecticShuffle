@@ -29,17 +29,31 @@ Each queue top-up is a mix of **weighted picks** (tracks your history says you l
 
 ## Installation
 
-### Step 1 — Download the zip
+Choose one of the two methods below.
 
-Go to [Releases](../../releases) and download `EclecticShuffle-1.0.0.zip`. Save it anywhere on your computer.
-
-### Step 2 — Upload to LMS
+### Method A — Add as a repository (recommended for auto-updates)
 
 1. Open LMS in your browser (usually `http://your-server:9000`)
 2. Go to **Settings** (top right)
 3. Click the **Plugins** tab
-4. Scroll to the bottom and click **Install from file**
-5. Choose the zip file you downloaded and click **Install**
+4. Under **Third-party repositories**, enter:
+   ```
+   https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml
+   ```
+5. Click **Apply**
+6. Go to the **Plugins** list, find **EclecticShuffle**, tick it, and click **Apply**
+7. Restart LMS when prompted
+
+The plugin will automatically update when new versions are released.
+
+### Method B — Manual zip install
+
+1. Go to [Releases](https://github.com/lolmc/EclecticShuffle/releases) and download `EclecticShuffle-1.0.0.zip`
+2. Open LMS in your browser (usually `http://your-server:9000`)
+3. Go to **Settings** (top right)
+4. Click the **Plugins** tab
+5. Scroll to the bottom and click **Install from file**
+6. Choose the zip file and click **Install**
 
 ### Step 3 — Restart LMS
 

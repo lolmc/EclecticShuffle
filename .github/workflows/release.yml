@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install perlcritic
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libperl-critic-perl
+
+      - name: Lint
+        run: perlcritic --severity 3 EclecticShuffle/*.pm
+
+      - name: Test
+        run: prove -l t/
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build zip, inject SHA, create release
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          ZIP="EclecticShuffle-${VERSION}.zip"
+
+          # Build initial zip
+          zip -r "$ZIP" EclecticShuffle/ \
+            --exclude "*.DS_Store" \
+            --exclude "__MACOSX/*"
+
+          # Compute SHA256
+          SHA=$(sha256sum "$ZIP" | cut -d' ' -f1)
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+          # Inject correct url and sha into repo.xml
+          sed -i "s|<url>.*</url>|<url>https://github.com/lolmc/EclecticShuffle/releases/download/${TAG}/EclecticShuffle-${VERSION}.zip</url>|" repo.xml
+          sed -i "s|<sha>.*</sha>|<sha>${SHA}</sha>|" repo.xml
+
+          # Inject sha into the zip's install.xml
+          cd EclecticShuffle
+          sed -i "s|<sha>.*</sha>|<sha>${SHA}</sha>|" install.xml
+          cd ..
+
+          # Rebuild zip with updated install.xml
+          rm -f "$ZIP"
+          zip -r "$ZIP" EclecticShuffle/ \
+            --exclude "*.DS_Store" \
+            --exclude "__MACOSX/*"
+
+          ls -la "$ZIP" repo.xml
+
+          # Create GitHub release
+          gh release create "$TAG" \
+            --title "EclecticShuffle ${TAG}" \
+            --notes "## EclecticShuffle ${TAG}
+
+Install: download the zip below, then LMS Settings → Plugins → Install from file.
+
+**Or add the repository:**
+1. LMS Settings → Plugins → Add Repository
+2. Enter: \`https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml\`
+3. Click OK and restart LMS.
+
+SHA256: \`${SHA}\`" \
+            "${ZIP}" \
+            "repo.xml"

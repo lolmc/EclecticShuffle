@@ -9,7 +9,9 @@
       <license>MIT</license>
       <module>Plugins::EclecticShuffle::Plugin</module>
       <defaultState>enabled</defaultState>
-      <icon></icon>
+      <!-- repo.xml fields — updated by release workflow -->
+      <url>https://github.com/lolmc/EclecticShuffle/releases/download/v1.0.0/EclecticShuffle-1.0.0.zip</url>
+      <sha>f99cd78ebd7b4db4db5449c1374000afb10985b8</sha>
     </plugin>
   </plugins>
 </extensions>

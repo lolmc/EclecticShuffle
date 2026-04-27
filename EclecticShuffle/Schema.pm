@@ -186,9 +186,11 @@ sub _db_path {
 }
 
 sub _open_db {
-    my $path = _db_path();
+   my $path = _db_path();
+   # Ensure secure database file permissions
+   chmod 0600, $path if -e $path;
 
-    $_dbh = DBI->connect(
+   $_dbh = DBI->connect(
         "dbi:SQLite:dbname=$path", '', '',
         { RaiseError => 1, AutoCommit => 1, PrintError => 0 },
     ) or die "Cannot open DB at $path: " . DBI->errstr . "\n";

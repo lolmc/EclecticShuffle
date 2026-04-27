@@ -1,0 +1,25 @@
+# Agent config files
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Conversation logs and internal notes
+CONVERSATIONS.log
+TODOS.md
+System Details.md
+Added Feature.md
+Feature Response.md
+Original Idea.md
+Original Response.md
+
+# Build artifacts
+EclecticShuffle-*.zip
+*.zip
+
+# Project collateral
+music-discovery-api-guide.md
+music-discovery.jsx
+
+# OS files
+.DS_Store
+__MACOSX/

@@ -1,1 +1,0 @@
-Band members should looking for members in current selection and where they left and joined other bands. Also, there should be a mood option as well

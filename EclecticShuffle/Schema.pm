@@ -274,9 +274,10 @@ sub _run_prune {
     my $dbh = _get_dbh() or return;
     my $cutoff = time() - ( PRUNE_DAYS * 86400 );
 
-    eval {
-        $dbh->begin_work;
-        $dbh->do( 'DELETE FROM play_events WHERE played_at < ?', undef, $cutoff );
+eval {
+   $dbh->begin_work;
+   $log->debug("Starting transaction for event pruning");
+   $dbh->do( 'DELETE FROM play_events WHERE played_at < ?', undef, $cutoff );
         _recalculate_from_events($dbh);
         $dbh->commit;
         $log->info("EclecticShuffle: prune complete");
@@ -303,14 +304,21 @@ sub _recalculate_from_events {
 
     $dbh->do('DELETE FROM track_weights');
 
-    my $sql = sprintf( q{
-        INSERT INTO track_weights (track_id, base_weight, last_updated)
-        SELECT
+   my $sql = q{
+      INSERT INTO track_weights (track_id, base_weight, last_updated)
+      SELECT track_id, ?, datetime('now')
+      FROM (
+         SELECT
             track_id,
-            MAX(%s, MIN(%s,
-                1.0
-                + SUM(CASE WHEN event_type = 'completion' THEN %s ELSE 0.0 END)
-                - SUM(CASE WHEN event_type = 'skip'       THEN %s ELSE 0.0 END)
+            MAX(0.2, MIN(1.0,
+               1.0
+               + SUM(CASE WHEN event_type = 'completion' THEN 0.1 ELSE 0.0 END)
+            )) AS base_weight
+         FROM play_events
+         GROUP BY track_id
+      );
+   };
+   $dbh->do($sql, undef, $base_weight);- SUM(CASE WHEN event_type = 'skip'       THEN %s ELSE 0.0 END)
             )),
             MAX(played_at)
         FROM play_events

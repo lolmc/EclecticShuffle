@@ -72,20 +72,48 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           SHA: ${{ steps.build.outputs.sha }}
         run: |
-          # Write notes to a file (avoid heredoc — YAML | block spacing confuses <<- EOF)
-          echo "## EclecticShuffle ${TAG}" > .release-notes.md
-          echo "" >> .release-notes.md
-          echo "Install: download the zip below, then LMS Settings -> Plugins -> Install from file." >> .release-notes.md
-          echo "" >> .release-notes.md
-          echo "**Or add the repository:**" >> .release-notes.md
-          echo "1. LMS Settings -> Plugins -> Add Repository" >> .release-notes.md
-          echo '2. Enter: `https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml`' >> .release-notes.md
-          echo "3. Click OK and restart LMS." >> .release-notes.md
-          echo "" >> .release-notes.md
-          echo "SHA256: \`${SHA}\`" >> .release-notes.md
+          set -x
 
-          gh release create "$TAG" \
-            --title "EclecticShuffle ${TAG}" \
-            --notes-file .release-notes.md \
-            "EclecticShuffle-${TAG#v}.zip" \
-            "repo.xml"
+          # Build release body using echo (safe inside YAML | block)
+          echo '## EclecticShuffle '"${TAG}" > .release-notes.md
+          echo '' >> .release-notes.md
+          echo 'Install: download the zip below, then LMS Settings -> Plugins -> Install from file.' >> .release-notes.md
+          echo '' >> .release-notes.md
+          echo '**Or add the repository:**' >> .release-notes.md
+          echo '1. LMS Settings -> Plugins -> Add Repository' >> .release-notes.md
+          echo '2. Enter: `https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml`' >> .release-notes.md
+          echo '3. Click OK and restart LMS.' >> .release-notes.md
+          echo '' >> .release-notes.md
+          echo 'SHA256: `'"${SHA}"'`' >> .release-notes.md
+
+          # Create release via API
+          RELEASE=$(curl -sf -X POST \
+            "https://api.github.com/repos/lolmc/EclecticShuffle/releases" \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"tag_name\": \"${TAG}\",
+              \"name\": \"EclecticShuffle ${TAG}\",
+              \"body\": $(jq -Rs . < .release-notes.md),
+              \"draft\": false,
+              \"prerelease\": false
+            }")
+
+          RELEASE_ID=$(echo "$RELEASE" | jq -r .id)
+          echo "Release ID: ${RELEASE_ID}"
+
+          # Upload zip
+          curl -sf -X POST \
+            "https://uploads.github.com/repos/lolmc/EclecticShuffle/releases/${RELEASE_ID}/assets?name=EclecticShuffle-${TAG#v}.zip" \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@EclecticShuffle-${TAG#v}.zip"
+
+          # Upload repo.xml
+          curl -sf -X POST \
+            "https://uploads.github.com/repos/lolmc/EclecticShuffle/releases/${RELEASE_ID}/assets?name=repo.xml" \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Content-Type: application/xml" \
+            --data-binary "@repo.xml"
+
+          echo "Release ${TAG} published."

@@ -179,7 +179,7 @@ sub _score_outgoing_track {
     return unless $track_id;
 
     # Discard event if duration is unknown (e.g. stream, network drop with no metadata).
-    unless ( $duration && $duration > 0 ) {
+    if ( !$duration || $duration <= 0 ) {
         $log->debug("EclecticShuffle: skipping score for $track_id — duration unknown");
         return;
     }

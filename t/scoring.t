@@ -44,3 +44,6 @@ is( recalc_weight(5,  0),  6.0, 'recalc: 5 completions, 0 skips' );
 is( recalc_weight(0,  4),  0.1, 'recalc: 0 completions, 4 skips => floor' );
 is( recalc_weight(15, 0), 10.0, 'recalc: many completions => cap' );
 is( recalc_weight(3,  2),  3.0, 'recalc: 3 completions, 2 skips: 1+3-1=3' );
+
+
+1;

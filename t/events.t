@@ -27,3 +27,6 @@ is( classify_event(0.79),  'partial',    'boundary: 0.79 is partial' );
 is( classify_event(0.80),  'completion', 'boundary: 0.80 is completion' );
 is( classify_event(0.95),  'completion', 'near-end completion' );
 is( classify_event(1.00),  'completion', 'full play (1.00)' );
+
+
+1;

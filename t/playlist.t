@@ -106,3 +106,6 @@ sub log_sum_exp_draw_probs {
     ok( abs($sum - 1.0) < 0.0001, 'log-sum-exp: probabilities sum to 1 (normal values)' );
     ok( $probs[0] > $probs[2],    'log-sum-exp: higher score beats lower score' );
 }
+
+
+1;

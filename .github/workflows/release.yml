@@ -95,7 +95,7 @@ jobs:
           echo "Creating release for tag ${TAG}..."
           RELEASE=$(curl -f -X POST \
             "https://api.github.com/repos/lolmc/EclecticShuffle/releases" \
-            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "{
               \"tag_name\": \"${TAG}\",
@@ -111,14 +111,14 @@ jobs:
           # Upload zip
           curl -sf -X POST \
             "https://uploads.github.com/repos/lolmc/EclecticShuffle/releases/${RELEASE_ID}/assets?name=EclecticShuffle-${TAG#v}.zip" \
-            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Content-Type: application/zip" \
             --data-binary "@EclecticShuffle-${TAG#v}.zip"
 
           # Upload repo.xml
           curl -sf -X POST \
             "https://uploads.github.com/repos/lolmc/EclecticShuffle/releases/${RELEASE_ID}/assets?name=repo.xml" \
-            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Content-Type: application/xml" \
             --data-binary "@repo.xml"
 

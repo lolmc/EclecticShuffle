@@ -170,4 +170,4 @@ Half the queue is always filled from LMS's own native random picks — tracks yo
 
 ## License
 
-MIT
+GPL v3

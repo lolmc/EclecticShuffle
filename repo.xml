@@ -6,7 +6,7 @@
       <desc lang="EN">Adaptive shuffle that learns from your listening history. Tracks you complete get played more; tracks you skip get played less.</desc>
       <link>https://github.com/lolmc/EclecticShuffle</link>
       <creator>Lol McBride</creator>
-      <license>MIT</license>
+      <license>GPL v3</license>
       <module>Plugins::EclecticShuffle::Plugin</module>
       <defaultState>enabled</defaultState>
       <!-- repo.xml fields — updated by release workflow -->

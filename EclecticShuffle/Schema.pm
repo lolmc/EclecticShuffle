@@ -54,6 +54,8 @@ sub init {
         Time::HiRes::time(),
         \&_run_prune,
     );
+
+    return;
 }
 
 sub is_fallback { $_fallback }

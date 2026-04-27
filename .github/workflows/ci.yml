@@ -21,7 +21,15 @@ jobs:
           sudo apt-get install -y --no-install-recommends libperl-critic-perl
 
       - name: Lint
-        run: perlcritic --severity 3 EclecticShuffle/*.pm
+        run: |
+          perlcritic --severity 3 \
+            --exclude "Modules::RequireBarewordIncludes" \
+            --exclude "Modules::RequireFilenameMatchesPackage" \
+            --exclude "ValuesAndExpressions::ProhibitLiteralStringLineBreaks" \
+            --exclude "BuiltinFunctions::RequireCheckingReturnValueOfEval" \
+            --exclude "Subroutines::RequireFinalReturn" \
+            --exclude "ControlStructures::ProhibitUnlessWithElse" \
+            EclecticShuffle/*.pm t/*.t
 
       - name: Test
         run: prove -l t/

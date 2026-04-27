@@ -72,19 +72,17 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           SHA: ${{ steps.build.outputs.sha }}
         run: |
-          # Write notes to a file to avoid YAML parsing issues with special characters
-          cat > .release-notes.md <<- EOF
-          ## EclecticShuffle ${TAG}
-
-          Install: download the zip below, then LMS Settings -> Plugins -> Install from file.
-
-          **Or add the repository:**
-          1. LMS Settings -> Plugins -> Add Repository
-          2. Enter: \`https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml\`
-          3. Click OK and restart LMS.
-
-          SHA256: \`${SHA}\`
-          EOF
+          # Write notes to a file (avoid heredoc — YAML | block spacing confuses <<- EOF)
+          echo "## EclecticShuffle ${TAG}" > .release-notes.md
+          echo "" >> .release-notes.md
+          echo "Install: download the zip below, then LMS Settings -> Plugins -> Install from file." >> .release-notes.md
+          echo "" >> .release-notes.md
+          echo "**Or add the repository:**" >> .release-notes.md
+          echo "1. LMS Settings -> Plugins -> Add Repository" >> .release-notes.md
+          echo '2. Enter: `https://github.com/lolmc/EclecticShuffle/releases/latest/download/repo.xml`' >> .release-notes.md
+          echo "3. Click OK and restart LMS." >> .release-notes.md
+          echo "" >> .release-notes.md
+          echo "SHA256: \`${SHA}\`" >> .release-notes.md
 
           gh release create "$TAG" \
             --title "EclecticShuffle ${TAG}" \

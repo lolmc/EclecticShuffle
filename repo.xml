@@ -7,11 +7,11 @@
       <link>https://github.com/lolmc/EclecticShuffle</link>
       <creator>Lol McBride</creator>
       <license>GPL v3</license>
-      <module>Plugins::EclecticShuffle::Plugin</module>
+    <module>Plugins::EclecticShuffle::Plugin</module>
       <defaultState>enabled</defaultState>
       <!-- repo.xml fields — updated by release workflow -->
-      <url>https://github.com/lolmc/EclecticShuffle/releases/download/v1.0.0/EclecticShuffle-1.0.0.zip</url>
-      <sha>f99cd78ebd7b4db4db5449c1374000afb10985b8</sha>
+      <url>https://github.com/lolmc/EclecticShuffle/releases/download/v1.0.6/EclecticShuffle-1.0.6.zip</url>
+      <sha>904bcca271df856a57bbaf7eb3ba4540692cf1c3</sha>
     </plugin>
   </plugins>
 </extensions>

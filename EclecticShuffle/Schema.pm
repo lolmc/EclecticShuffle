@@ -306,27 +306,20 @@ sub _recalculate_from_events {
 
     $dbh->do('DELETE FROM track_weights');
 
-   my $sql = q{
-      INSERT INTO track_weights (track_id, base_weight, last_updated)
-      SELECT track_id, ?, datetime('now')
-      FROM (
-         SELECT
+    my $sql = sprintf(q{
+        INSERT INTO track_weights (track_id, base_weight, last_updated)
+        SELECT
             track_id,
-            MAX(0.2, MIN(1.0,
-               1.0
-               + SUM(CASE WHEN event_type = 'completion' THEN 0.1 ELSE 0.0 END)
-            )) AS base_weight
-         FROM play_events
-         GROUP BY track_id
-      );
-   };
-   $dbh->do($sql, undef, $base_weight);- SUM(CASE WHEN event_type = 'skip'       THEN %s ELSE 0.0 END)
-            )),
+            MAX(%s, MIN(%s,
+                1.0
+                + SUM(CASE WHEN event_type = 'completion' THEN %s ELSE 0.0 END)
+                - SUM(CASE WHEN event_type = 'skip'       THEN %s ELSE 0.0 END)
+            )) AS base_weight,
             MAX(played_at)
         FROM play_events
         WHERE event_type IN ('completion', 'skip')
         GROUP BY track_id
-    }, WEIGHT_FLOOR, WEIGHT_CAP, COMPLETION_BONUS, SKIP_PENALTY );
+    }, WEIGHT_FLOOR, WEIGHT_CAP, COMPLETION_BONUS, SKIP_PENALTY);
 
     $dbh->do($sql);
 }

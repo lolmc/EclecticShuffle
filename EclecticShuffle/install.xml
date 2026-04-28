@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extensions>
   <plugins>
-    <plugin name="EclecticShuffle" version="1.0.0" minTarget="8.0" maxTarget="*">
+    <plugin name="EclecticShuffle" version="1.0.5" minTarget="8.0" maxTarget="*">
       <title>EclecticShuffle</title>
       <desc lang="EN">Adaptive shuffle that learns from your listening history. Tracks you complete get played more; tracks you skip get played less.</desc>
       <link>https://github.com/lolmc/EclecticShuffle</link>

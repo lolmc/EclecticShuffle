@@ -46,29 +46,18 @@ jobs:
         run: |
           ZIP="EclecticShuffle-${VERSION}.zip"
 
-          # Build initial zip
+          # Build zip (one-shot — no rebuild after hash, because that changes the hash)
           zip -r "$ZIP" EclecticShuffle/ \
             --exclude "*.DS_Store" \
             --exclude "__MACOSX/*"
 
-          # Compute SHA256
-          SHA=$(sha256sum "$ZIP" | cut -d' ' -f1)
+          # Compute SHA1 (LMS 9 validates with sha1, not sha256)
+          SHA=$(sha1sum "$ZIP" | cut -d' ' -f1)
           echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
 
           # Inject correct url and sha into repo.xml
-          sed -i "s|<url>.*</url>|<url>https://github.com/lolmc/EclecticShuffle/releases/download/${TAG}/EclecticShuffle-${VERSION}.zip</url>|" repo.xml
+          sed -i "s|<url>.*</url>|<url>https://github.com/lolmc/EclecticShuffle/releases/download/${TAG}/${ZIP}</url>|" repo.xml
           sed -i "s|<sha>.*</sha>|<sha>${SHA}</sha>|" repo.xml
-
-          # Inject sha into the zip's install.xml
-          cd EclecticShuffle
-          sed -i "s|<sha>.*</sha>|<sha>${SHA}</sha>|" install.xml
-          cd ..
-
-          # Rebuild zip with updated install.xml
-          rm -f "$ZIP"
-          zip -r "$ZIP" EclecticShuffle/ \
-            --exclude "*.DS_Store" \
-            --exclude "__MACOSX/*"
 
           ls -la "$ZIP" repo.xml
 
